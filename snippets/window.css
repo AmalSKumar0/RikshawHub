@@ -1,0 +1,147 @@
+
+.paycard {
+    background-color: rgba(51, 51, 51, 0.26); /* Updated for better transparency */
+    position: fixed; /* Fixes the element relative to the viewport */
+    z-index: 5; /* Keeps it above other content */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    backdrop-filter: blur(5px); /* Adds blur to the background */
+    -webkit-backdrop-filter: blur(5px); /* For Safari support */
+    display: flex; /* Enables flexbox layout */
+    justify-content: center; /* Centers content horizontally */
+    align-items: center; /* Centers content vertically */
+    top: 0; /* Aligns the top of the paycard to the top of the viewport */
+    left: 0; /* Aligns the left side to the left of the viewport */
+}
+
+
+.payment-card {
+    position: relative;
+  top: 0%;
+  display: flex;
+  justify-content: space-between;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 750px; /* Fixed width */
+  height: auto; /* Fixed height */
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.left-section {
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+  max-height: 100%;
+}
+
+.car-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.image-container {
+  width: 100%;
+  height: 300px; /* Fixed dimensions */
+  overflow: hidden; /* Hide overflow */
+  margin-right: 20px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.car-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures image scales to fit container */
+}
+
+.car-details {
+  line-height: 1.5;
+}
+
+.car-details h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.car-details h3 {
+  margin-top: 20px;
+  font-size: 24px;
+  color: #333;
+}
+
+.car-specs {
+  display: flex;
+  justify-content: space-between;
+  background-color: #ebebeb;
+  padding: 10px;
+  border-radius: 5px;
+  max-width: 100%;
+}
+
+.specs-left, .specs-right {
+    flex: 1;
+    padding: 10px;
+}
+
+.specs-left p, .specs-right p {
+    /* margin-bottom: 30px; */
+    font-size: 16px;
+    padding-bottom: 5px;
+}
+
+.specs-left {
+    text-align: left;
+}
+
+.specs-right {
+    /* text-align: right; */
+}
+
+
+
+.car-specs p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.right-section {
+  width: 38%;
+  padding-left: 20px;
+  border-left: 2px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.right-section h2 {
+  margin: 0 0 10px;
+  font-size: 20px;
+}
+
+.payment-info p {
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+.purchase-button {
+  background-color: #000;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
+}
+
+.purchase-button:hover {
+  background-color: #333;
+}
+
+.gif{
+    height: 200px;
+}
