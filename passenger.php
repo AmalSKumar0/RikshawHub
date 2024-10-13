@@ -106,7 +106,7 @@ function getDistanceBetweenPlaces($place1, $place2) {
         $distance = haversineDistance($coords['place1'], $coords['place2']);
         return number_format($distance, 2);
     } else {
-        return "Unable to find coordinates for one or both places.";
+        return 0;
     }
 }
 
@@ -162,7 +162,7 @@ session_start();
 $_SESSION['whoEdit']='pass';
 $_SESSION['whoami']='pass';
 // getching booking data from bookings table 
-$stmt = $conn->prepare("SELECT * FROM bookings WHERE pass_id LIKE ? and status != 'complete confirmed' and status != 'cancel confirmed'");
+$stmt = $conn->prepare("SELECT * FROM bookings WHERE pass_id LIKE ?");
 $stmt->bind_param("s", $_SESSION['uid']);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -175,7 +175,7 @@ if($result->num_rows > 0){
   $flag=3;
 }
 else{$flag=1;}//if there is no data of user on bookings table, user is viewed the booking form
-if(isset($_GET['search']) && $_GET['search']=='search') $flag=2;
+if(isset($_GET['search']) && $_GET['search']=='search' ) $flag=2;
 if(isset($_GET['another']) && $_GET['another']=='another') $flag=1;
 
 //otp generator
@@ -188,17 +188,38 @@ function generateOTP($length = 6) {
 }
 // If confirmed the passenger reached destination
 if (isset($_GET['confirm'])) {
-    if($_GET['confirm']=='false')
-           $sql = "update bookings set status='cancel confirmed' WHERE pass_id = ?";
-    else
-           $sql = "update bookings set status='complete confirmed' WHERE pass_id = ?";
-  $stmt = $conn->prepare($sql);
-  $stmt->bind_param("i", $_SESSION['uid']);
-  if ($stmt->execute()) {
-      header("Location: " . $_SERVER['PHP_SELF']);
-      exit; 
-  }
+    // Set the status based on confirmation
+    $status = ($_GET['confirm'] == 'false') ? 'cancel' : 'complete';
+    
+    // First, retrieve the booking details you want to insert into the new table
+    $sql = "SELECT * FROM bookings WHERE pass_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $_SESSION['uid']);
+    
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        $booking = $result->fetch_assoc();
+
+        // Now, insert the booking details into the `completed_bookings` table
+        $insert_sql = "INSERT INTO completed_bookings (pass_id, driver_id, status, completion_time) 
+                       VALUES (?, ?, ?, NOW())";
+        $insert_stmt = $conn->prepare($insert_sql);
+        $insert_stmt->bind_param("iis", $booking['pass_id'], $booking['driver_id'], $status);
+        
+        if ($insert_stmt->execute()) {
+            // After successful insertion, delete the booking from the `bookings` table
+            $delete_sql = "DELETE FROM bookings WHERE pass_id = ?";
+            $delete_stmt = $conn->prepare($delete_sql);
+            $delete_stmt->bind_param("i", $_SESSION['uid']);
+            $delete_stmt->execute();
+            
+            // Redirect to the same page after completion
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit;
+        }
+    }
 }
+
 
 ?>
 
@@ -225,9 +246,18 @@ if (isset($_GET['confirm'])) {
 <div class="booking-section into">
     <!-- views based on the flags we mensioned before -->
     <h1 class="TagLine">
-        <?php if($flag==2){echo "RICKSHAWS NEAR<span class='ride'> ".$_GET['from']."</span>";}  else if($flag==1) {echo "Ready, Set,<span class='ride'> Ride!</span>";}else if($flag==3){echo "YOUR <span class='ride'> RIKSHAW </span> is on the way" ;} ?>
+        <?php if($flag==2){
+            if (isset($_GET['from']) && isset($_GET['to']) && isset($_GET['landmark'])) {
+                $_SESSION['from'] = $_GET['from'];
+                $_SESSION['to'] = $_GET['to'];
+                $_SESSION['landmark'] = $_GET['landmark'];
+                $distance = getDistanceBetweenPlaces($_SESSION['from'], $_SESSION['to']);
+                $_SESSION['distance'] = $distance;
+                $_SESSION['price']=calculateTripPrice($distance);
+            }
+            echo "RICKSHAWS NEAR<span class='ride'> ".explode(',', $_SESSION['from'])[0]."</span>";}  else if($flag==1) {echo "Ready, Set,<span class='ride'> Ride!</span>";}else if($flag==3){echo "YOUR <span class='ride'> RIKSHAW </span> is on the way" ;} ?>
     </h1>
-    <?php if($flag==2){echo "<form class='anotherbtn' method='get' action='".htmlspecialchars($_SERVER['PHP_SELF'])."'><button class='another' name='another' value='another'>Search another place</button></form>";}?>
+    <?php if($flag==2){echo "<form class='anotherbtn' method='get' action='".htmlspecialchars($_SERVER['PHP_SELF'])."'><button class='offline' name='another' value='another'>SEARCH ANOTHER PLACE </button></form>";}?>
     <div class="cardCont into <?php if($flag!=1) echo "display"; ?>">
         <div class="searchcard">
             <div class="searchcard-image">
@@ -284,15 +314,21 @@ if (isset($_GET['confirm'])) {
             $row = $result->fetch_assoc();
             ?>
             <div class="dia into">
-                <img src="uploads/<?php echo htmlspecialchars($row['Auto_img']); ?>" alt="">
+                <img class="imageView" src="uploads/<?php echo htmlspecialchars($row['Auto_img']); ?>" alt="">
             </div>
             <svg class="line" xmlns="http://www.w3.org/2000/svg">
                 <path d="M50,0 L50,300" stroke="orange" stroke-width="2" fill="none" stroke-dasharray="5,5" />
             </svg>
             <div class="searchcard-content">
                 <div class='trip-info'>
-                    <h2>TRIP: FROM: <?php echo strtoupper($_SESSION['from']); ?> TO:
-                        <?php echo strtoupper($_SESSION['to']); ?></h2>
+                <h2 style="color: #ff833e;" >
+    TRIP: FROM 
+    <?php echo explode(' ', strtoupper($_SESSION['from']))[0]; ?> 
+    TO 
+    <?php echo explode(' ', strtoupper($_SESSION['to']))[0]; ?>
+</h2>
+
+
                 </div>
                 <div class='driver-details'>
                     <h4>Driver Details</h4>
@@ -349,14 +385,7 @@ if (isset($_GET['confirm'])) {
 
 
 if ($flag==2) {
-  if (isset($_GET['from']) && isset($_GET['to']) && isset($_GET['landmark'])) {
-    $_SESSION['from'] = $_GET['from'];
-    $_SESSION['to'] = $_GET['to'];
-    $_SESSION['landmark'] = $_GET['landmark'];
-    $distance = getDistanceBetweenPlaces($_SESSION['from'], $_SESSION['to']);
-    $_SESSION['distance'] = $distance;
-    $_SESSION['price']=calculateTripPrice($distance);
-}
+  
   $stmt = $conn->prepare("SELECT * FROM driver WHERE current_location LIKE ? AND driver_id NOT IN (SELECT driver_id FROM bookings WHERE status = 'requested')");
   $searchTerm = '%' . $_GET['from'] . '%';
   $stmt->bind_param("s", $searchTerm);
@@ -398,14 +427,16 @@ if(isset($_GET['payment'])){
 }
 
 if (isset($_GET['Book'])) {//passenger booked a particular auto which they find intresting
+    
     $from = $_SESSION['from'];
     $to = $_SESSION['to'];
     $landmark = $_SESSION['landmark'];
     $_SESSION['did']=$_GET['Book'];
     $status = "requested";
-
-    $stmt = $conn->prepare("INSERT INTO bookings (pass_id, driver_id, `from`, `to`, landmark, status) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("iissss", $_SESSION['uid'], $_GET['Book'], $from, $to, $landmark, $status);
+    $price = $_SESSION['price'];
+    $distance = $_SESSION['distance'];
+    $stmt = $conn->prepare("INSERT INTO bookings (pass_id, driver_id, `from`, `to`, landmark, status,price,distance) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("iissssii", $_SESSION['uid'], $_GET['Book'], $from, $to, $landmark, $status, $price ,$distance);
 
     if ($stmt->execute()) {
          header("Location: " . $_SERVER['PHP_SELF']);

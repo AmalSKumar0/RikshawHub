@@ -32,12 +32,15 @@
     left: 37%;
     text-align: center;
 }
-.offline,.change{
+.offline{
+    position: relative;
+    width: 100%;
+    text-align: center;
     width: 190px;
 }
-.change span{
-    position: relative;
-    right: 10px;
+.offline:hover{
+    background-color: var(--primary-color-dark);
+    border: solid var(--primary-color-dark);
 }
 .card{
     border: 2px solid rgb(27, 24, 24)

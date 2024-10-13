@@ -1,4 +1,5 @@
 <?php include 'header.php'; ?>
+<?php session_start(); ?>
 <!-- landing page of our website -->
     <nav>
       <div class="nav__header">
@@ -18,7 +19,7 @@
         <!-- <li><a href="#" id="aboutusButton">Contact us</a></li> -->
       </ul>
       <div class="nav__btns">
-      <a href="adminLog.php" class="btn sign__in">Contact us</a>
+      <a href="contact.php" class="btn sign__in">Contact us</a>
       </div>
     </nav>
     <br>
@@ -49,7 +50,7 @@
         </p>
         <div class="container">
           <div class="input__row">
-            <a class="passenger" href="PassReg.php">I'M A PASSENGER</a><a class="driver" href="DriverReg.php">I'M A DRIVER</a>
+            <a class="passenger" href="<?php if(isset($_SESSION['uid'])){echo "passenger.php";} else{ echo "PassReg.php";}?>">I'M A PASSENGER</a><a class="driver" href="<?php if(isset($_SESSION['did'])){echo "Driver.php";} else{ echo "DriverReg.php";}?>">I'M A DRIVER</a>
           </div>
         </div>
       </div>

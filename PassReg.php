@@ -85,7 +85,6 @@ if (isset($_POST["login"]) && $_POST["login"] == "submit") {
             //user is logged in and session variables are declared
             $_SESSION['name'] = $user['name'];
             $_SESSION['uid'] = $user['pass_id'];
-
             echo '<script>window.location.href="passenger.php";</script>';
         } else {
             $err="Incorrect password";
