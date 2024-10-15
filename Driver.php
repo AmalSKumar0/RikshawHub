@@ -65,7 +65,7 @@ if ((isset($_GET['offline']) && $_GET['offline'] == 'true') || (isset($_GET['cha
 if (isset($_GET['accept'])) {
     $sql = "UPDATE bookings SET status = 'accepted' WHERE driver_id = ? and pass_id=?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ii", $_SESSION['did'],$_GET['accept']);
+    $stmt->bind_param("ii", $_SESSION['did'], $_GET['accept']);
     if ($stmt->execute()) {
         //passWaitFlag is for knowing that driver has accepted the request for a view 
         $_SESSION['passWaitFlag'] = 1;
@@ -80,11 +80,11 @@ if (isset($_GET['accept'])) {
 if (isset($_GET['cancel'])) {
     $sql = "UPDATE bookings SET status = 'canceled' WHERE driver_id = ? and pass_id=?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ii", $_SESSION['did'],$_GET['cancel']);
+    $stmt->bind_param("ii", $_SESSION['did'], $_GET['cancel']);
     if ($stmt->execute()) {
         header($_SERVER['PHP_SELF']);
     } else {
-       //add a error message
+        //add a error message
     }
     $stmt->close();
 }
@@ -148,6 +148,7 @@ if ($flag == 2 && isset($_SESSION['passWaitFlag'])) {
     $stmt->execute();
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
+    $_SESSION['price'] = $row['price'];
 
     $stmt = $conn->prepare("SELECT name,phone_no FROM passenger WHERE pass_id = ?");
     $stmt->bind_param("i", $row['pass_id']);
@@ -166,12 +167,12 @@ if ($flag == 2 && isset($_SESSION['passWaitFlag'])) {
                 <h2 class="searchcard-title">Your passenger is <?php echo $user['name']; ?></h2>
                 <p class="confirm-details">Phone no:<?php echo $user['phone_no']; ?></p>
                 <p class="confirm-details">Their landmark is <?php echo $row['landmark']; ?></p>
-                <p class="confirm-details">The trip is from <?php 
-    $from = explode(' ', $row['from']);
-    $to = explode(' ', $row['to']);
-    echo $from[0] . ' to ' . $to[0]; 
-?>
-</p>
+                <p class="confirm-details">The trip is from <?php
+                                                            $from = explode(' ', $row['from']);
+                                                            $to = explode(' ', $row['to']);
+                                                            echo $from[0] . ' to ' . $to[0];
+                                                            ?>
+                </p>
                 <form method="get" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
                     <div class="fromTo">
                         <div class="form-group">
@@ -179,7 +180,8 @@ if ($flag == 2 && isset($_SESSION['passWaitFlag'])) {
                             <input type="number" name="otp" id="from" placeholder="OTP FOR CONFIRMATION" required>
                         </div>
                         <div class="find-button">
-                            <button value="true" name="completed" class="search">ENTER</button>
+                            <button value="true" name="completed" style="width: 170px;" class="search">COMPLETE
+                                TRIP</button>
                         </div>
                     </div>
                 </form>
@@ -199,9 +201,7 @@ WHERE driver_id = ? AND status = 'accepted'";
             $stmt->bind_param("i", $_SESSION['did']);
 
             if ($stmt->execute()) {
-                unset($_SESSION['passWaitFlag']);
-               echo "<script>window.location.reload();</script>";
-                exit;
+                include 'snippets/thankyou.php';
             } else {
                 // Log or display error message for debugging
                 error_log("Update failed: " . $stmt->error);
@@ -215,6 +215,12 @@ WHERE driver_id = ? AND status = 'accepted'";
             echo "<script>window.location.reload();</script>";
             exit;
         }
+    }
+    if (isset($_GET['goBack'])) {
+        unset($_SESSION['passWaitFlag']);
+        // Redirect to avoid form resubmission or refresh
+        echo '<script>window.location.href="Driver.php";</script>';
+        exit;
     }
 }
 
@@ -239,14 +245,14 @@ if ($flag == 2 && !isset($_SESSION['passWaitFlag'])) {
             while ($row = $result->fetch_assoc()) { ?>
                 <div class="card">
                     <div class="card-content">
-                        <h3>TRIP from:<?php 
-    $from = explode(' ', $row['from']);
-    $to = explode(' ', $row['to']);
-    echo $from[0] . ' to ' . $to[0]; 
-?>
-</h3>
-<p>Price: Rs<?php echo $row['price']; ?></p>
-<p>Distance:<?php echo $row['distance']; ?> KM</p>
+                        <h3>TRIP from:<?php
+                                        $from = explode(' ', $row['from']);
+                                        $to = explode(' ', $row['to']);
+                                        echo $from[0] . ' to ' . $to[0];
+                                        ?>
+                        </h3>
+                        <p>Price: Rs<?php echo $row['price']; ?></p>
+                        <p>Distance:<?php echo $row['distance']; ?> KM</p>
                         <div class="button-group">
                             <form method="get" style="display:inline;"
                                 action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
@@ -314,7 +320,8 @@ if ($flag == 2 && !isset($_SESSION['passWaitFlag'])) {
 
             // Make a request to the Nominatim API with bounding box restriction
             fetch(
-                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&viewbox=${southIndiaBbox}&bounded=1`)
+                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&viewbox=${southIndiaBbox}&bounded=1`
+                )
                 .then(response => response.json())
                 .then(data => {
                     cache[query] = data; // Cache the results

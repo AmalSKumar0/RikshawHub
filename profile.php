@@ -94,7 +94,7 @@ if(isset($_GET['back'])){//if back button is clicked the user is taken back to t
             <li>Address:<?php echo $address;?></li>
             <?php if($_SESSION['whoami'] == 'driver'){ ?>
               <!-- if the view is for passenger -->
-              <li>Rating:<?php echo $rating;?></li>
+              <li>Rating:<?php echo $rating;?>☆ </li>
             <li>Licence no:<?php echo $licence;?></li>
             <li>Vehicle no:<?php echo $vehicle;?></li>
             <li>Joined on:<?php echo $date;?></li>

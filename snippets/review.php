@@ -1,54 +1,83 @@
-<?php
-// Assuming the connection $conn has already been established
-$stmt = $conn->prepare("SELECT * FROM driver WHERE driver_id = ?");
-$searchTerm = $_SESSION['driverid']; // No need for wildcard search on IDs
-$stmt->bind_param("s", $searchTerm);
-$stmt->execute();
-$result = $stmt->get_result();
-$row = $result->fetch_assoc();
-?>
-
-
-<link rel="stylesheet" href="snippets/window.css">
-<div class="paycard">
-<div class="payment-card">
-  <div class="left-section">
-  <h3>DRIVER DETAILS:</h3>
-    <div class="car-info">
-      <div class="image-container">
-        <img src="uploads/<?php echo $row['Auto_img']; ?>" alt="Car Image" class="car-image" />
-      </div>
-    </div>
-    
-    <div class="car-specs">
-    <div class="specs-left">
-        <p><strong>Name:</strong> <?php echo $row['name']; ?> </p>
-        <p><strong>Gender:</strong> <?php echo $row['gender']; ?> </p>
-        <p><strong>Address:</strong> <?php echo $row['address']; ?> </p>
-    </div>
-    <div class="specs-right">
-        <p><strong>Rating:</strong> <?php echo $row['rating']; ?> </p>
-        <p><strong>Licence No:</strong> <?php echo $row['licence_no']; ?> </p>
-        <p><strong>Vehicle No:</strong> <?php echo $row['vehicle_no']; ?> </p>
-    </div>
+<link rel="stylesheet" href="snippets/review.scss">
+<div class="exterior">
+    <div class="reviewBox">
+        <h1 class="text"><b>LEAVE A <span>REVIEW</span>...</b></h1>
+        <form method="get" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
+<div class="feedback">
+    <label class="angry">
+        <input type="radio" value="1" name="feedback" />
+        <div>
+            <svg class="eye left">
+                <use xlink:href="#eye">
+            </svg>
+            <svg class="eye right">
+                <use xlink:href="#eye">
+            </svg>
+            <svg class="mouth">
+                <use xlink:href="#mouth">
+            </svg>
+        </div>
+    </label>
+    <label class="sad">
+        <input type="radio" value="2" name="feedback" />
+        <div>
+            <svg class="eye left">
+                <use xlink:href="#eye">
+            </svg>
+            <svg class="eye right">
+                <use xlink:href="#eye">
+            </svg>
+            <svg class="mouth">
+                <use xlink:href="#mouth">
+            </svg>
+        </div>
+    </label>
+    <label class="ok">
+        <input type="radio" value="3" name="feedback" />
+        <div></div>
+    </label>
+    <label class="good">
+        <input type="radio" value="4" name="feedback" checked />
+        <div>
+            <svg class="eye left">
+                <use xlink:href="#eye">
+            </svg>
+            <svg class="eye right">
+                <use xlink:href="#eye">
+            </svg>
+            <svg class="mouth">
+                <use xlink:href="#mouth">
+            </svg>
+        </div>
+    </label>
+    <label class="happy">
+        <input type="radio" value="5" name="feedback" />
+        <div>
+            <svg class="eye left">
+                <use xlink:href="#eye">
+            </svg>
+            <svg class="eye right">
+                <use xlink:href="#eye">
+            </svg>
+        </div>
+    </label>
 </div>
-  </div>
+        
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 4" id="eye">
+        <path d="M1,1 C1.83333333,2.16666667 2.66666667,2.75 3.5,2.75 C4.33333333,2.75 5.16666667,2.16666667 6,1"></path>
+    </symbol>
+    <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 7" id="mouth">
+        <path d="M1,5.5 C3.66666667,2.5 6.33333333,1 9,1 C11.6666667,1 14.3333333,2.5 17,5.5"></path>
+    </symbol>
+</svg>
 
-  <div class="right-section">
-  <img src="snippets/Accept Evrything.gif" alt="Car Image" class="gif" />
-    <h2>Payment detail</h2>
-    <div class="payment-info">
-      <p>Pyament to: <?php echo $row['name'];?></p>
-      <p>From: <?php echo explode(',', $_SESSION['from'])[0];?> To: <?php echo explode(',', $_SESSION['to'])[0];?></p>
-        <p>Subtotal: <?php echo '₹'.$_SESSION['price'];?></p>
-        <p>Total Distance: <?php echo $_SESSION['distance']." KM";?></p>
-        <p>Promo code: none</p>
-        <h3>Total: <?php echo '₹'.$_SESSION['price'];?></h3>
-    </div>
-    <form style="display: block; " id="paymentbuttons" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="get">
-            <button name="Back" class="back-button">Back</button>
-            <button name="Book" value="<?php echo $_SESSION['driverid']; ?>" class="purchase-button">Purchase</button>
-    </form>
-  </div>
+        <textarea id="review" name="review_text" placeholder="Write your review here..."></textarea>
+
+        <div class="buttons">
+            <button type="button" class="back-btn" onclick="history.back()">Go Back</button>
+            <button type="submit" name="submitReview" value="true" class="submit-btn">Submit</button>
+        </div>
+        </form>
 </div>
 </div>

@@ -1,4 +1,4 @@
-<?php include 'header.php'; ?>
+<?php include 'header.php';?>
 <?php session_start(); ?>
 <!-- landing page of our website -->
     <nav>

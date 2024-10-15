@@ -283,12 +283,20 @@ form {
     height: 100%;
     object-fit: cover;
 }
-
+.button-review{
+    position: relative;
+    top: 40px;
+    left: -100%;
+}
 .searchcard-content {
     position: relative;
-    left: -130px;
+    left: -100px;
+    
+    /* background-color: #db6f35; */
 }
-
+.passvie{
+    width: 470px;
+}
 .trip-info {
     font-size: 30px;
 }

@@ -312,6 +312,7 @@ if (isset($_GET['confirm'])) {
             $stmt->execute();
             $result = $stmt->get_result();
             $row = $result->fetch_assoc();
+            $_SESSION["review_rating"]=$row['rating'];
             ?>
             <div class="dia into">
                 <img class="imageView" src="uploads/<?php echo htmlspecialchars($row['Auto_img']); ?>" alt="">
@@ -319,7 +320,7 @@ if (isset($_GET['confirm'])) {
             <svg class="line" xmlns="http://www.w3.org/2000/svg">
                 <path d="M50,0 L50,300" stroke="orange" stroke-width="2" fill="none" stroke-dasharray="5,5" />
             </svg>
-            <div class="searchcard-content">
+            <div class="searchcard-content passvie">
                 <div class='trip-info'>
                 <h2 style="color: #ff833e;" >
     TRIP: FROM 
@@ -368,10 +369,51 @@ if (isset($_GET['confirm'])) {
                     } elseif ($Bookingdata['status'] == 'completed') { // if the trip is completed and the OTP matches the driver's OTP
                         echo "<div class='status-message' style='color: #28a745;'>Passenger reached destination</div>";
                     ?>
-                    <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method='get'>
+                    <form style="display:flex;flex-direction:row;" class="button-review" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method='get'>
+                    <button class="search pass-confirm-button" name='review' value="">Review</button>
                         <button class="search pass-confirm-button" name='confirm' value="true">Confirm</button>
                     </form>
-                    <?php
+                    
+                       
+                         <?php if(isset($_GET['review'])) include 'snippets/review.php'; 
+                         if (isset($_GET['submitReview'])) {
+                             // Get the form data
+                             $rating = $_GET['feedback'];         // The rating (stars)
+                             $text = $_GET['review_text'];      // The review text
+                         
+                             // Example pass_id and driver_id (you can retrieve these from session or form)
+                             $pass_id = $_SESSION['uid'];       // Assuming these are passed in the form
+                             $driver_id = $_SESSION['did'];   // Or set them from session data like $_SESSION['driver_id']
+                             // Prepare the SQL insert query
+                             $updated_rating=0;
+                             if($_SESSION["review_rating"]==0){$updated_rating=$rating;}
+                             else {$updated_rating=($_SESSION["review_rating"]+$rating)/2;$_SESSION["review_rating"]=$updated_rating;}
+                             $stmt = $conn->prepare("UPDATE  driver set rating=? where driver_id=?");
+                             $stmt->bind_param("ii", $updated_rating, $driver_id); 
+                             $stmt->execute();
+
+                             $sql = "INSERT INTO reviews (pass_id, driver_id, review_text, created_date, stars) 
+                                     VALUES (?, ?, ?, NOW(), ?)";
+                         
+                             // Prepare the statement
+                             if ($stmt = $conn->prepare($sql)) {
+                                 // Bind the parameters
+                                 $stmt->bind_param("iisi", $pass_id, $driver_id, $text, $rating); 
+                         
+                                 // Execute the statement
+                                 if ($stmt->execute()) {
+                                     echo '<script>window.location.href="passenger.php";</script>';
+                                 } else {
+                                     echo '<script>consol.log("Error? '.$pass_id.' '.$driver_id.'");</script>';
+                                     echo "Error: " . $stmt->error;
+                                 }
+                         
+                                 // Close the statement
+                                 $stmt->close();
+                             } else {
+                                 echo "Error preparing the query: " . $mysqli->error;
+                             }
+                         }
                     }
                     ?>
                 </div>
