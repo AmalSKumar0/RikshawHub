@@ -52,6 +52,8 @@ if (isset($_POST["Register"]) && $_POST["Register"] == "submit") {
             $result = $stmt->get_result();
             $user = $result->fetch_assoc();
             // user is registered in and a passenger session is started with his pass_id
+            $_SESSION['name'] = $user['name'];
+            $_SESSION['gender'] = $user['gender'];
             $_SESSION['uid'] = $user['pass_id'];
             echo '<script>window.location.href="passenger.php";</script>';
         } else {
@@ -84,6 +86,7 @@ if (isset($_POST["login"]) && $_POST["login"] == "submit") {
             $user = $result->fetch_assoc();
             //user is logged in and session variables are declared
             $_SESSION['name'] = $user['name'];
+            $_SESSION['gender'] = $user['gender'];
             $_SESSION['uid'] = $user['pass_id'];
             echo '<script>window.location.href="passenger.php";</script>';
         } else {

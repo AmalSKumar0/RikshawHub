@@ -316,3 +316,50 @@ form {
     position: relative;
     left: 10%;
 }
+
+#suggestions,
+#suggestions2 {
+    border: 1px solid #ddd;
+    max-width: 300px;
+    margin-top: 5px;
+    position: absolute;
+    background-color: white;
+    z-index: 1000;
+}
+
+.suggestion-item {
+    padding: 5px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background-color: #eee;
+}
+.pfp{
+    position: relative;
+    height:25px;
+    width: auto;
+    margin-right: 10px;
+}
+.admin a{
+    position: relative;
+    width: 100%;
+    display: inline-flex;
+    align-items: center; 
+}
+.circle {
+    width: 30px;            /* Set the width of the circular container */
+    height: 30px;           /* Set the height to the same value to create a circle */
+    border-radius: 50%;      /* Make the container circular */
+    overflow: hidden;        /* Hide any overflow to maintain the circular shape */
+    display: flex;           /* Center the image */
+    justify-content: center;  /* Center the image horizontally */
+    align-items: center;     /* Center the image vertically */
+    margin-right: 10px;
+}
+
+.pfp-auto {
+    width: 100%;             /* Make the image take the full width of the circle */
+    height: auto;            /* Auto height to maintain aspect ratio */
+    object-fit: cover;       /* Cover the container while maintaining aspect ratio */
+}

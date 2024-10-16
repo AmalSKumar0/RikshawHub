@@ -72,7 +72,7 @@
     </symbol>
 </svg>
 
-        <textarea id="review" name="review_text" placeholder="Write your review here..."></textarea>
+        <textarea id="review" name="review_text" placeholder="Write your review here..." required></textarea>
 
         <div class="buttons">
             <button type="button" class="back-btn" onclick="history.back()">Go Back</button>

@@ -22,6 +22,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 $row = $result->fetch_assoc();
 $_SESSION['name'] = $row['name'];
+$_SESSION['img']=$row['Auto_img'];
 //  if the driver is ready for the ride $flag=2
 if ($row['is_active']) {
     $_SESSION['cloc'] = $row['current_location'];
@@ -104,9 +105,10 @@ if (isset($_GET['cancel'])) {
         <li><a href="index.php">Home</a></li>
         <li><a href="#">About Us</a></li>
         <li><a href="#" id="testimoniesButton">Reviews</a></li>
-        <li><a href="#" id="aboutusButton">Contact us</a></li>
+        <li><a href="contact.php" id="aboutusButton">Contact us</a></li>
     </ul>
     <div class="admin"><a href="profile.php">
+         <div class="circle"><img class="pfp-auto" src="uploads/<?php echo $_SESSION['img']; ?>" alt="profile pic"></div>
             <span><?php echo " " . $_SESSION['name']; ?></span> </a>
     </div>
 </nav>
@@ -269,82 +271,6 @@ if ($flag == 2 && !isset($_SESSION['passWaitFlag'])) {
         $stmt->close();
     }
     ?>
-    <style>
-        #suggestions {
-            border: 1px solid #ddd;
-            max-width: 300px;
-            margin-top: 5px;
-            position: absolute;
-            background-color: white;
-            z-index: 1000;
-        }
-
-        .suggestion-item {
-            padding: 5px;
-            cursor: pointer;
-        }
-
-        .suggestion-item:hover {
-            background-color: #eee;
-        }
-    </style>
-    <script>
-        let debounceTimeout;
-        const cache = {}; // Cache object to store previous API responses
-
-        document.getElementById('autocomplete').addEventListener('input', function() {
-            const query = this.value.trim();
-
-            // Clear the suggestions if query is empty
-            if (!query) {
-                document.getElementById('suggestions').innerHTML = '';
-                return;
-            }
-
-            // Use debounce to limit the number of API calls
-            clearTimeout(debounceTimeout);
-            debounceTimeout = setTimeout(() => {
-                fetchSuggestions(query);
-            }, 300); // 300 ms delay
-        });
-
-        function fetchSuggestions(query) {
-            // Check if the query is already cached
-            if (cache[query]) {
-                displaySuggestions(cache[query]);
-                return;
-            }
-
-            // Define the bounding box for South India (approximately)
-            const southIndiaBbox = '72.5,8.0,80.5,15.0';
-
-            // Make a request to the Nominatim API with bounding box restriction
-            fetch(
-                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&viewbox=${southIndiaBbox}&bounded=1`
-                )
-                .then(response => response.json())
-                .then(data => {
-                    cache[query] = data; // Cache the results
-                    displaySuggestions(data);
-                })
-                .catch(error => console.error('Error fetching Nominatim suggestions:', error));
-        }
-
-        function displaySuggestions(data) {
-            const suggestionsContainer = document.getElementById('suggestions');
-            suggestionsContainer.innerHTML = ''; // Clear previous suggestions
-
-            // Show suggestions
-            data.forEach(function(place) {
-                const suggestionItem = document.createElement('div');
-                suggestionItem.classList.add('suggestion-item');
-                suggestionItem.textContent = place.display_name;
-                suggestionItem.onclick = function() {
-                    document.getElementById('autocomplete').value = place.display_name;
-                    suggestionsContainer.innerHTML = ''; // Clear suggestions
-                };
-                suggestionsContainer.appendChild(suggestionItem);
-            });
-        }
-    </script>
+   
+    <script src="scripts/passenger.js"></script>
     <?php include 'footer.php'; ?>

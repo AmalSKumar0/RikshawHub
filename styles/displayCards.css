@@ -13,7 +13,6 @@
     left: 10%;
     width: 40%;
     color: var(--text-dark);
-    justify-content: center;
     font-family: var(--header-font);
     font-size: 1.5em;
   }
