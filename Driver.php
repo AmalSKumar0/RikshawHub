@@ -129,9 +129,9 @@ if (isset($_GET['cancel'])) {
                     <div class="fromTo">
                         <div class="form-group">
                             <label for="from">Current location:</label>
-                            <input type="text" name="cloc" id="autocomplete" id="from" placeholder="Current location"
-                                required>
+                            <input type="text" name="cloc" id="autocomplete" placeholder="Current location" required>
                             <div id="suggestions"></div>
+                            <div id="from-error" class="error-message"></div> <!-- Error Message -->
                         </div>
                         <div class="find-button">
                             <button value="live" name="live" class="search">GO LIVE!</button>

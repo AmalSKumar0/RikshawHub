@@ -83,31 +83,12 @@ if (isset($_GET['back'])) {
 
           <!-- Modal Structure -->
           <div id="reviewModal" class="modal">
-            <div class="modal-content">
-              <span class="close">&times;</span>
-              <h2>Driver Reviews</h2>
-              <div id="reviewList">
-                <?php
-                // Fetching reviews from the database
-                $stmt = $conn->prepare("SELECT * FROM reviews WHERE driver_id = ?");
-                $stmt->bind_param("i", $_SESSION['did']);
-                $stmt->execute();
-                $result = $stmt->get_result();
-
-                if ($result->num_rows > 0) {
-                  while ($review = $result->fetch_assoc()) {
-                    echo "<div class='review-item'>";
-                    echo "<p><strong>Rating:</strong> " . $review['stars'] . "/5</p>";
-                    echo "<p><strong>Review:</strong> " . htmlspecialchars($review['review_text']) . "</p>";
-                    echo "</div>";
-                  }
-                } else {
-                  echo "<p>No reviews yet.</p>";
-                }
-                ?>
+                <div class="modal-content">
+                  <span class="close">&times;</span>
+                  <h2>Driver Reviews</h2>
+                  <?php include 'snippets/reviewViewer.php'; ?>
+                </div>
               </div>
-            </div>
-          </div>
 
           <form method="get" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
             <button name="back" value="true">BACK</button>
