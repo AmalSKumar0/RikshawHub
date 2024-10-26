@@ -21,7 +21,7 @@ $stmt->bind_param("s", $_SESSION['did']);
 $stmt->execute();
 $result = $stmt->get_result();
 $row = $result->fetch_assoc();
-$_SESSION['name'] = $row['name'];
+$_SESSION['drivername'] = $row['name'];
 $_SESSION['img']=$row['Auto_img'];
 //  if the driver is ready for the ride $flag=2
 if ($row['is_active']) {
@@ -109,7 +109,7 @@ if (isset($_GET['cancel'])) {
     </ul>
     <div class="admin"><a href="profile.php">
          <div class="circle"><img class="pfp-auto" src="uploads/<?php echo $_SESSION['img']; ?>" alt="profile pic"></div>
-            <span><?php echo " " . $_SESSION['name']; ?></span> </a>
+            <span><?php echo " " . $_SESSION['drivername']; ?></span> </a>
     </div>
 </nav>
 

@@ -293,7 +293,7 @@ overflow: hidden;
   width:200px;
   color: var(--text-dark);
   position: relative;
-  left: 34%;
+  left: 28%;
   top: 6%;
 }
 
@@ -447,6 +447,7 @@ a:hover,a:focus{
 }
 .testimonial .testimonial-title a{
   display: inline-block;
+  text-decoration: none;
   color: #FB8C00;
   font-size: 20px;
   font-weight: 700;
@@ -476,12 +477,40 @@ a:hover,a:focus{
   line-height: 40px;
   margin-right: 5px;
 }
+.owl-prev span, .owl-next span {
+  left: 43%;
+  color: var(--primary-color);
+  font-size: 40px;
+  background-color: #333333;
+  position: relative;
+  height: 60px; /* changed to match width */
+  width: 60px; /* added */
+  border-radius: 50%; /* changed to 50% for circle */
+  padding: 0;
+  display: flex; /* added for centering */
+  justify-content: center; /* added for horizontal centering */
+  align-items: center; /* added for vertical centering */
+  border: none;
+}
+
 .owl-prev:before,
 .owl-next:before{
-  content: "\f060";
+  content: "";
   font-family: 'FontAwesome';
   font-size: 20px;
+  color: var(--primary-color);
 }
 .owl-next:before{
-  content: "\f061";
+  content: "";
+}
+.noReview{
+  color: var(--primary-color); 
+  position: relative;
+  top: 60px;
+  left: 42%;
+}
+.review-title{
+  background-color:#FB8C00;
+  text-align: center;
+  border-radius: 5vmin;
 }

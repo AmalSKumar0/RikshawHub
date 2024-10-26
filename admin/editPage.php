@@ -104,22 +104,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $licence = validate_input($_POST['licence']);
         $vehicle = validate_input($_POST['vehicle']);
         $auto_image = $_FILES['image']['name'];
-        if($auto_image){
-        $target_dir = "uploads/";
-        $target_file = $target_dir . basename($_FILES["image"]["name"]);
-        $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-        $check = getimagesize($_FILES["image"]["tmp_name"]);
-
-        if ($check !== false) {
-            if (!file_exists($target_file)) {
-                move_uploaded_file($_FILES["image"]["tmp_name"], $target_file);
+        if ($auto_image) {
+            $target_dir = "../uploads/"; // Ensure uploads folder exists in the correct directory
+            $target_file = $target_dir . basename($_FILES["image"]["name"]);
+            $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+            $check = getimagesize($_FILES["image"]["tmp_name"]);
+        
+            // Check if the file is an image
+            if ($check !== false) {
+                // Add more validation, such as checking the file size or allowed formats
+                if (!file_exists($target_file)) {
+                    if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
+                        // Image uploaded successfully
+                    } else {
+                        // Handle error
+                        echo "Sorry, there was an error uploading your file.";
+                    }
+                }
+            } else {
+                echo "File is not an image.";
             }
+        } else {
+            $auto_image = $img;  // Keep the previous image if no new one is uploaded
         }
-    }
-    else{
-        $auto_image=$img;
-    }
-
         $stmt = $conn->prepare("UPDATE driver SET name = ?, email = ?, phone_no = ?, address = ?, vehicle_no = ?, licence_no = ?, gender = ?, Auto_img = ? WHERE driver_id = ?");
         $stmt->bind_param("ssssssssi", $name, $email, $phone, $address, $vehicle, $licence, $gender, $auto_image, $_SESSION['did']);
         if ($stmt->execute()) {

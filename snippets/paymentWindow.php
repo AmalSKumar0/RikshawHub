@@ -47,7 +47,7 @@ $row = $result->fetch_assoc();
     </div>
     <form style="display: block; " id="paymentbuttons" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="get">
             <button name="Back" class="back-button">Back</button>
-            <button name="Book" value="<?php echo $_SESSION['driverid']; ?>" class="purchase-button">Purchase</button>
+            <button name="Book" value="<?php echo $_SESSION['driverid']; ?>" class="purchase-button">Book</button>
     </form>
   </div>
 </div>

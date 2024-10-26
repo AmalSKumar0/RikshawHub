@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="images/favicon.ico" title="Favicon" />
   <title>Document</title>
+  
 </head>
 <?php
 //connecting to database
@@ -85,7 +86,7 @@ if (isset($_GET['back'])) {
           <div id="reviewModal" class="modal">
                 <div class="modal-content">
                   <span class="close">&times;</span>
-                  <h2>Driver Reviews</h2>
+                  <h2 class="review-title">Driver Reviews</h2>
                   <?php include 'snippets/reviewViewer.php'; ?>
                 </div>
               </div>

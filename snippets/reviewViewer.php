@@ -30,15 +30,18 @@
                         <small>- <?php echo $review['stars']."/5"; ?></small>
                     </h3>
                 </div>
-                  <?php }
-                } else {
-                  echo "<p>No reviews yet.</p>";
-                }
+                  <?php } 
+                } 
                 ?>
             </div>
         </div>
     </div>
 </div>
+<?php
+    if (!$result->num_rows > 0) {
+        echo "<p class='noReview'>No reviews yet.</p>";
+      }
+?>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
 

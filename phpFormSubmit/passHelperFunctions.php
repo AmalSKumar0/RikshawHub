@@ -36,6 +36,11 @@ function getDistanceBetweenPlaces($place1, $place2)
             }
 
             $url = "https://api.opencagedata.com/geocode/v1/json?q=" . urlencode($place) . "&key=" . $apiKey . "&limit=1";
+            // Escape the URL for JavaScript
+$escapedUrl = json_encode($url);
+
+// Output the JavaScript alert
+echo "<script>alert($escapedUrl);</script>";
 
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
