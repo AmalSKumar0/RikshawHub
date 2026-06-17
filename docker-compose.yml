@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8085:80"
+    environment:
+      DB_HOST: db
+      DB_USER: rikshaw_user
+      DB_PASS: rikshaw_pass
+      DB_NAME: rikshawhub
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root_root_secure
+      MYSQL_DATABASE: rikshawhub
+      MYSQL_USER: rikshaw_user
+      MYSQL_PASSWORD: rikshaw_pass
+    volumes:
+      - ./rikshawhub.sql:/docker-entrypoint-initdb.d/rikshawhub.sql
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db_data:

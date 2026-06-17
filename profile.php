@@ -7,11 +7,7 @@
     <title>Document</title>
 </head>
 <?php
-//connecting to database
-   $conn = mysqli_connect("localhost", "root", "", "rikshawhub");
-   if (!$conn) {
-       die("Connection failed: " . mysqli_connect_error());
-   }
+require_once 'config.php';
    session_start();
    //both are same cause the user is viewing his won profile
    $_SESSION['whoEdit']=$_SESSION['whoami'];

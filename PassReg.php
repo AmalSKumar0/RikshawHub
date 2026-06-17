@@ -27,10 +27,7 @@
     <!-- background aniamtion ends here -->
     <?php
  $err="";
-$conn = mysqli_connect("localhost", "root", "", "rikshawhub");
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
-}
+require_once 'config.php';
 session_start();
 // if the register button is clicked the user data is stored in database passenger
 if (isset($_POST["Register"]) && $_POST["Register"] == "submit") {
@@ -56,8 +53,9 @@ if (isset($_POST["Register"]) && $_POST["Register"] == "submit") {
     if($confirm_password != $password) {//if password doesnt match
         echo "<p>Password does not match</p>";
     } else {
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
         $stmt = $conn->prepare("INSERT INTO passenger (name, email, phone_no, address, password, gender) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssss", $name, $email, $phone, $address, $password, $gender);
+        $stmt->bind_param("ssssss", $name, $email, $phone, $address, $hashed_password, $gender);
         if ($stmt->execute()) {
             $_SESSION['name'] = $name;
             $stmt = $conn->prepare("SELECT * FROM passenger WHERE email = ?");
@@ -95,7 +93,7 @@ if (isset($_POST["login"]) && $_POST["login"] == "submit") {
         $stmt->bind_result($db_password);
         $stmt->fetch();
         //cross checking passwords
-        if ($db_password == $password) {
+        if (password_verify($password, $db_password)) {
             $stmt = $conn->prepare("SELECT * FROM passenger WHERE email = ?");
             $stmt->bind_param("s", $email);
             $stmt->execute();

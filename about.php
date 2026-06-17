@@ -157,8 +157,8 @@ footer p {
       </div>
       <ul class="nav__links" id="nav-links">
         <!-- <li><a href="#">Destination</a></li> -->
-        <li><a href="#" style="color:#ff833e;">Home</a></li>
-        <li><a href="about.html" >About Us</a></li>
+        <li><a href="index.php">Home</a></li>
+        <li><a href="about.php" style="color:#ff833e;">About Us</a></li>
         <li><a href="#" id="testimoniesButton">Reviews</a></li>
         <li><a href="PassReg.php" >Ride now</a></li>
         <!-- <li><a href="#" id="aboutusButton">Contact us</a></li> -->

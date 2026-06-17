@@ -13,7 +13,7 @@
     <ul class="nav__links" id="nav-links">
         <!-- <li><a href="#">Destination</a></li> -->
         <li><a href="#" style="color:#ff833e;">Home</a></li>
-        <li><a href="#">About Us</a></li>
+        <li><a href="about.php">About Us</a></li>
         <li><a href="#" id="testimoniesButton">Reviews</a></li>
         <li><a href="PassReg.php">Ride now</a></li>
         <!-- <li><a href="#" id="aboutusButton">Contact us</a></li> -->

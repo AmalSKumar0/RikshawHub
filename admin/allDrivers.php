@@ -8,11 +8,7 @@ function handleError($error) {
     die("Something went wrong! Please try again later.");
 }
 
-$conn = mysqli_connect("localhost", "root", "", "rikshawhub");
-
-if ($conn->connect_error) {
-    handleError("Connection failed: " . $conn->connect_error);
-}
+require_once __DIR__ . '/../config.php';
 //if the buttons are clicked
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
     if (isset($_GET['delete'])) {

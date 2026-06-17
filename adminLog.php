@@ -8,11 +8,7 @@
 </head>
 <?php
  $err="";
-$conn = mysqli_connect("localhost", "root", "", "rikshawhub");
-
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
-}
+require_once 'config.php';
 session_start();
 
 // login for the admin 
@@ -31,7 +27,7 @@ if (isset($_POST["login"]) && $_POST["login"] == "submit"){
         $stmt->bind_result($db_password);
         $stmt->fetch();
         
-        if ($password==$db_password) {
+        if (password_verify($password, $db_password)) {
             $stmt = $conn->prepare("SELECT name FROM admintable WHERE email = ?");
             $stmt->bind_param("s", $email);
             $stmt->execute();

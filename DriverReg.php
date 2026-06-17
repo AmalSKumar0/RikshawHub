@@ -10,12 +10,7 @@
 <?php
 session_start();
  $err="";//error variable to show error in our input field
- //connecting to our database
-$conn = mysqli_connect("localhost", "root", "", "rikshawhub");
-
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
-}
+require_once 'config.php';
 
 //if the driver registered his details
 //it will be stored in temporary database table for the admin to view and accept or reject

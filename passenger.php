@@ -9,11 +9,7 @@
 <?php include 'phpFormSubmit/passHelperFunctions.php'; ?>
 
 <?php
-$conn = mysqli_connect("localhost", "root", "", "rikshawhub");
-//connecting to database
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
-}
+require_once 'config.php';
 //declaring session to edit and view the profile of the passenger
 $_SESSION['whoEdit'] = 'pass';
 $_SESSION['whoami'] = 'pass';

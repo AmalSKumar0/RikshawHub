@@ -39,10 +39,10 @@ CREATE TABLE `admintable` (
 --
 
 INSERT INTO `admintable` (`admin_id`, `name`, `email`, `password`) VALUES
-(1, 'Amal S Kumar', 'amalskumar@gmail.com', 'amal@123'),
-(2, 'Aleena Maria James', 'aleenamariajames@gmail.com', 'aleena@123'),
-(3, 'Joshua M Philip', 'joushuamphilip@gmail.com', 'joshua@123'),
-(4, 'Riyan Shamsudeen', 'riyanshamsudeen@gmail.com', 'riyan@123');
+(1, 'Amal S Kumar', 'amalskumar@gmail.com', '$2y$12$0a7Ym1taY5LHBxSXm86ElugH0wu5hSXI0kbp1QfhEI36HwmD5m4YS'),
+(2, 'Aleena Maria James', 'aleenamariajames@gmail.com', '$2y$12$B3tNP6uKv6zFzQO9eZI8Mevtmn8WJl/lr.TesFRY0ToWgwSEQsoLO'),
+(3, 'Joshua M Philip', 'joushuamphilip@gmail.com', '$2y$12$vrs00iAWfjlbMsrz8l5Rt.ol.h9qdCKLi2Bpn7Y5vN4JiunLdM9pO'),
+(4, 'Riyan Shamsudeen', 'riyanshamsudeen@gmail.com', '$2y$12$cr3QoneMFL6/CGb0DQ5AlOK.AOUmhyA5l/ZsnWcTngol1dfeEx7l.');
 
 -- --------------------------------------------------------
 
@@ -153,7 +153,7 @@ CREATE TABLE `passenger` (
 --
 
 INSERT INTO `passenger` (`pass_id`, `name`, `email`, `phone_no`, `address`, `password`, `gender`) VALUES
-(9, 'Abijit', 'abijit@gmail.com', '8590774603', 'erumely', '123', 'Male');
+(9, 'Abijit', 'abijit@gmail.com', '8590774603', 'erumely', '$2y$12$U3dUK3flqVvIqFJMC0LheuyGVR91WYw17I9Ecff1QE3Uf6muQM0ca', 'Male');
 
 -- --------------------------------------------------------
 

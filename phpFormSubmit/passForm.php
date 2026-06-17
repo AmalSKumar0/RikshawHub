@@ -72,9 +72,8 @@ if (isset($_GET['submitReview'])) {
         // Close the statement
         $stmt->close();
     } else {
-        echo "Error preparing the query: " . $mysqli->error;
+        echo "Error preparing the query: " . $conn->error;
     }
-}
 
 // If confirmed the passenger reached destination
 if (isset($_GET['confirm'])) {

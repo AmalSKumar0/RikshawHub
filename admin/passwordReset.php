@@ -23,11 +23,7 @@
 </div>
 
 <?php
-// connecting to database
-$conn = mysqli_connect("localhost", "root", "", "rikshawhub");
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
-}
+require_once __DIR__ . '/../config.php';
 $err="";
 session_start();
 

@@ -10,11 +10,7 @@ $_SESSION['whoami'] = 'driver';
 ?>
 <?php
 // connecting to database
-$conn = mysqli_connect("localhost", "root", "", "rikshawhub");
-
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
-}
+require_once 'config.php';
 //fetching details of the driver from driver table
 $stmt = $conn->prepare("SELECT * FROM driver WHERE driver_id LIKE ?");
 $stmt->bind_param("s", $_SESSION['did']);
