@@ -15,11 +15,11 @@
         <li><a href="index.php">Home</a></li>
         <li><a href="about.php" >About Us</a></li>
         <li><a href="#" id="testimoniesButton">Reviews</a></li>
-        <li><a href="PassReg.php" style="color:#ff833e;">Contact us</a></li>
+        <li><a href="contact.php" style="color:#ff833e;">Contact us</a></li>
         <!-- <li><a href="#" id="aboutusButton">Contact us</a></li> -->
       </ul>
       <div class="nav__btns">
-      <a href="PassReg.php" class="btn sign__in">Login/Signin</a>
+      <a href="login.php?role=passenger" class="btn sign__in">Login/Signin</a>
       </div>
     </nav>
     <section>

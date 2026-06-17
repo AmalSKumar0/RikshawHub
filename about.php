@@ -160,11 +160,11 @@ footer p {
         <li><a href="index.php">Home</a></li>
         <li><a href="about.php" style="color:#ff833e;">About Us</a></li>
         <li><a href="#" id="testimoniesButton">Reviews</a></li>
-        <li><a href="PassReg.php" >Ride now</a></li>
+        <li><a href="login.php?role=passenger" >Ride now</a></li>
         <!-- <li><a href="#" id="aboutusButton">Contact us</a></li> -->
       </ul>
       <div class="nav__btns">
-      <a href="adminLog.php" class="btn sign__in">Contact us</a>
+      <a href="contact.php" class="btn sign__in">Contact us</a>
       </div>
     </nav>
     </header>
@@ -202,3 +202,5 @@ footer p {
     </footer>
 </body>
 </html>
+
+

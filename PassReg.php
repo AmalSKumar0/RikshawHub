@@ -1,195 +1,182 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-    <link rel="shortcut icon" href="images/favicon.ico" title="Favicon" />
-    <title>RICKSHAWHUB</title>
-    <link rel="stylesheet" type="text/css" href="styles/LoginReg.css">
-    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
-</head>
-
-<body>
-    <!-- background animation -->
-    <div class="area">
-        <ul class="circles">
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-        </ul>
-    </div>
-    <!-- background aniamtion ends here -->
-    <?php
- $err="";
-require_once 'config.php';
+<?php
 session_start();
-// if the register button is clicked the user data is stored in database passenger
-if (isset($_POST["Register"]) && $_POST["Register"] == "submit") {
-    $name = isset($_POST['name']) ? $_POST['name'] : '';
+require_once 'config.php';
+
+$err = "";
+
+// Passenger Registration logic
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = isset($_POST['name']) ? htmlspecialchars(trim($_POST['name'])) : '';
+    $email = isset($_POST['email']) ? htmlspecialchars(trim($_POST['email'])) : '';
+    $gender = isset($_POST['gender']) ? htmlspecialchars(trim($_POST['gender'])) : '';
+    $address = isset($_POST['address']) ? htmlspecialchars(trim($_POST['address'])) : '';
+    $phone = isset($_POST['phone']) ? htmlspecialchars(trim($_POST['phone'])) : '';
     $password = isset($_POST['password']) ? $_POST['password'] : '';
-    $confirm_password = isset($_POST['confirm']) ? $_POST['confirm'] : '';
-    $email = isset($_POST['email']) ? $_POST['email'] : '';
-    $gender = isset($_POST['gender']) ? $_POST['gender'] : '';
-    $address = isset($_POST['address']) ? $_POST['address'] : '';
-    $phone = isset($_POST['phone']) ? $_POST['phone'] : '';
-    $stmt = $conn->prepare("
-    SELECT email FROM driver WHERE email = ?
-    UNION
-    SELECT email FROM temporarydriver WHERE email = ?
-    UNION
-    SELECT email FROM passenger WHERE email = ?");
-    $stmt->bind_param("sss", $email, $email, $email);
-    $stmt->execute();
-    $stmt->store_result();
-    if ($stmt->num_rows > 0) {
-       $err = "Email already exists";
-    } else {
-    if($confirm_password != $password) {//if password doesnt match
-        echo "<p>Password does not match</p>";
-    } else {
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $conn->prepare("INSERT INTO passenger (name, email, phone_no, address, password, gender) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssss", $name, $email, $phone, $address, $hashed_password, $gender);
-        if ($stmt->execute()) {
-            $_SESSION['name'] = $name;
-            $stmt = $conn->prepare("SELECT * FROM passenger WHERE email = ?");
-            $stmt->bind_param("s", $email);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $user = $result->fetch_assoc();
-            // user is registered in and a passenger session is started with his pass_id
-            $_SESSION['name'] = $user['name'];
-            $_SESSION['gender'] = $user['gender'];
-            $_SESSION['uid'] = $user['pass_id'];
-            header("Location: passenger.php");
-            exit();
-        } else {
-            echo "<p>Error: " . $stmt->error . "</p>";
-        }
-        $stmt->close();
-    }
-  }
-}
-
-//login button is pressed this will check the user exist or not 
-//cross checks the password as well
-if (isset($_POST["login"]) && $_POST["login"] == "submit") {
-    $email = $_POST['logmail'];
-    $password = $_POST['logpass'];
-    $stmt = $conn->prepare("SELECT password FROM passenger WHERE email like ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $stmt->store_result();
+    $confirm = isset($_POST['confirm']) ? $_POST['confirm'] : '';
     
-    if ($stmt->num_rows == 0) {
-       $err="User not found";//user not found
+    if ($password !== $confirm) {
+        $err = "Passwords do not match.";
     } else {
-        $stmt->bind_result($db_password);
-        $stmt->fetch();
-        //cross checking passwords
-        if (password_verify($password, $db_password)) {
-            $stmt = $conn->prepare("SELECT * FROM passenger WHERE email = ?");
-            $stmt->bind_param("s", $email);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $user = $result->fetch_assoc();
-            //user is logged in and session variables are declared
-            $_SESSION['name'] = $user['name'];
-            $_SESSION['gender'] = $user['gender'];
-            $_SESSION['uid'] = $user['pass_id'];
-            echo '<script>window.location.href="passenger.php";</script>';
+        // Check if email already exists
+        $stmt = $conn->prepare("
+            SELECT email FROM driver WHERE email = ?
+            UNION
+            SELECT email FROM temporarydriver WHERE email = ?
+            UNION
+            SELECT email FROM passenger WHERE email = ?");
+        $stmt->bind_param("sss", $email, $email, $email);
+        $stmt->execute();
+        $stmt->store_result();
+        
+        if ($stmt->num_rows > 0) {
+            $err = "Email address already registered.";
         } else {
-            $err="Incorrect password";
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $conn->prepare("INSERT INTO passenger (name, email, phone_no, address, password, gender) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssssss", $name, $email, $phone, $address, $hashed_password, $gender);
+            if ($stmt->execute()) {
+                // Fetch the new passenger to set session variables
+                $stmt = $conn->prepare("SELECT * FROM passenger WHERE email = ?");
+                $stmt->bind_param("s", $email);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $user = $result->fetch_assoc();
+                
+                $_SESSION['name'] = $user['name'];
+                $_SESSION['gender'] = $user['gender'];
+                $_SESSION['uid'] = $user['pass_id'];
+                header("Location: passenger.php");
+                exit();
+            } else {
+                $err = "Registration failed. Try again.";
+            }
         }
         $stmt->close();
     }
 }
-
 mysqli_close($conn);
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link rel="shortcut icon" href="images/favicon.ico" title="Favicon"/>
+    <title>Passenger Registration | RICKSHAWHUB</title>
+    <link rel="stylesheet" href="styles/auth.css">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="area">
+        <ul class="circles">
+            <li></li><li></li><li></li><li></li><li></li>
+            <li></li><li></li><li></li><li></li><li></li>
+        </ul>
+    </div>
 
-    <body>
-        <div class="wrapper">
-            <div class="inner">
-                <div class="image-holder">
-                    <img src="images/registration-form.jpg" alt="">
-                </div>
-                <a href="index.php" class="cross"></a>
-                <!-- user registraion form -->
-                <form method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" class="disable">
-                    <h3>Passenger <span>Registration</span></h3>
-                    <h5 class="error"><?php echo $err; ?></h5>
-                    <div class="form-wrapper">
-                        <input type="text" placeholder="Name" required name="name" class="form-control"
-                            fdprocessedid="k0kcxa">
-                        <i class="zmdi zmdi-account"></i>
-                    </div>
-                    <div class="form-wrapper">
-                        <input type="email" required placeholder="Email Address" name="email" class="form-control"
-                            fdprocessedid="8zam0p">
-                        <i class="zmdi zmdi-email"></i>
-                    </div>
-                    <div class="form-wrapper">
-                        <select name="gender" required id="" class="form-control" fdprocessedid="yn864i" required>
-                            <option value="" disabled="" selected="">Gender</option>
-                            <option value="male">Male</option>
-                            <option value="femal">Female</option>
-                            <option value="other">Other</option>
-                        </select>
-                        <i class="zmdi zmdi-caret-down" style="font-size: 17px"></i>
-                    </div>
-                    <div class="form-wrapper">
-                        <input type="text" required placeholder="Address" name="address" class="form-control">
-                        <i class="zmdi zmdi-lock"></i>
-                    </div>
-                    <div class="form-wrapper">
-                        <input type="tel" required placeholder="Phone number" name="phone" class="form-control"
-                            fdprocessedid="kci4k">
-                        <i class="zmdi zmdi-lock"></i>
-                    </div>
-                    <div class="form-wrapper">
-                        <input type="password" placeholder="Password" class="form-control" fdprocessedid="kci4k"
-                            name="password" required>
-                        <input type="password" placeholder="Confirm Password" class="form-control" fdprocessedid="fbisd"
-                            name="confirm" required>
-                        <i class="zmdi zmdi-lock"></i>
-                    </div>
-                    <div class="buttons">
-                        <button fdprocessedid="lfyluc" value="submit" name="Register">Register
-                        </button>
-                        <div class="logbtn">Login</div>
-                    </div>
-                </form>
-                <!-- user login form -->
-                <form method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" class="login">
-                    <h3>Passenger <span>Login</span></h3>
-                    <div class="form-wrapper">
-                        <input type="email" placeholder="Email Address" class="form-control" name="logmail" required>
-                        <i class="zmdi zmdi-email"></i>
-                    </div>
+    <!-- Main Auth Card -->
+    <div class="auth-card">
+        <!-- Close Button -->
+        <a href="index.php" class="cross-btn" aria-label="Go to home">&times;</a>
 
-                    <div class="form-wrapper">
-                        <input type="password" placeholder="Password" class="form-control" name="logpass" required>
-                        <i class="zmdi zmdi-lock"></i>
-                    </div>
-                    <h5 class="error"><?php echo $err; ?></h5>
-                    <div class="buttons">
-                        <button fdprocessedid="lfyluc" value="submit" name="login">Login
-                        </button>
-                        <div class="regbtn">Register</div>
-                    </div>
-                </form>
+        <!-- Left Column: Branding / Hero -->
+        <div class="auth-hero">
+            <div class="hero-branding">
+                <h1 class="hero-logo">RICKSHAW<span>HUB</span>.</h1>
+                <p class="hero-desc">Create your passenger account to start booking quick, affordable, and safe rides across town.</p>
+            </div>
+            
+            <div class="hero-graphics">
+                <img src="assets/header.png" alt="Auto Rickshaw Graphic">
+            </div>
+
+            <div class="hero-footer">
+                <p>&copy; <?php echo date("Y"); ?> RikshawHub. All rights reserved.</p>
             </div>
         </div>
-        <script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-23581568-13"></script>
-        <script src='scripts/reg.js'></script>
-    </body>
-</body>
 
+        <!-- Right Column: Registration Form -->
+        <div class="auth-form-section">
+            <h3 class="auth-view-title">Passenger <span>Registration</span></h3>
+
+            <!-- Global Notifications -->
+            <?php if (!empty($err)): ?>
+                <div class="alert alert-error">
+                    <i class="ri-error-warning-line"></i>
+                    <span><?php echo $err; ?></span>
+                </div>
+            <?php endif; ?>
+
+            <form method="post" action="PassReg.php">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <div class="input-with-icon">
+                            <input type="text" placeholder="John Doe" name="name" required value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>">
+                            <i class="ri-user-line"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <div class="input-with-icon">
+                            <input type="email" placeholder="john@example.com" name="email" required value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
+                            <i class="ri-mail-line"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Gender</label>
+                        <div class="input-with-icon">
+                            <select name="gender" required>
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="Male" <?php echo (isset($_POST['gender']) && $_POST['gender'] === 'Male') ? 'selected' : ''; ?>>Male</option>
+                                <option value="Female" <?php echo (isset($_POST['gender']) && $_POST['gender'] === 'Female') ? 'selected' : ''; ?>>Female</option>
+                                <option value="Other" <?php echo (isset($_POST['gender']) && $_POST['gender'] === 'Other') ? 'selected' : ''; ?>>Other</option>
+                            </select>
+                            <i class="ri-arrow-down-s-line"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <div class="input-with-icon">
+                            <input type="tel" placeholder="10-digit mobile number" name="phone" pattern="[0-9]{10}" title="Ten digit phone number" required value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>">
+                            <i class="ri-phone-line"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group form-group-full">
+                        <label class="form-label">Address</label>
+                        <div class="input-with-icon">
+                            <input type="text" placeholder="Home address" name="address" required value="<?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?>">
+                            <i class="ri-home-4-line"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group form-group-full">
+                        <label class="form-label">Passwords</label>
+                        <div class="password-row">
+                            <div class="input-with-icon">
+                                <input type="password" placeholder="Password" name="password" required>
+                                <i class="ri-lock-line"></i>
+                            </div>
+                            <div class="input-with-icon">
+                                <input type="password" placeholder="Confirm Password" name="confirm" required>
+                                <i class="ri-lock-check-line"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions" style="margin-top: 30px;">
+                    <button type="submit" class="submit-btn">Register</button>
+                    <a href="login.php" class="toggle-view-link">Already have an account? <strong>Login</strong></a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
 </html>

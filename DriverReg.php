@@ -1,200 +1,240 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-    <title>Driver Registration</title>
-    <link rel="shortcut icon" href="images/favicon.ico" title="Favicon" />
-    <link rel="stylesheet" type="text/css" href="styles/LoginReg.css">
-    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
-</head>
 <?php
 session_start();
- $err="";//error variable to show error in our input field
 require_once 'config.php';
 
-//if the driver registered his details
-//it will be stored in temporary database table for the admin to view and accept or reject
-if (isset($_POST["Register"]) && $_POST["Register"] == "submit") {
+$err = "";
+$success = "";
+
+// Driver Registration logic
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = isset($_POST['name']) ? htmlspecialchars(trim($_POST['name'])) : '';
-    $password = isset($_POST['password']) ? $_POST['password'] : '';
     $email = isset($_POST['email']) ? htmlspecialchars(trim($_POST['email'])) : '';
     $gender = isset($_POST['gender']) ? htmlspecialchars(trim($_POST['gender'])) : '';
     $address = isset($_POST['address']) ? htmlspecialchars(trim($_POST['address'])) : '';
     $phone = isset($_POST['phone']) ? htmlspecialchars(trim($_POST['phone'])) : '';
     $licence = isset($_POST['licence']) ? htmlspecialchars(trim($_POST['licence'])) : '';
     $vehicle = isset($_POST['vehicle']) ? htmlspecialchars(trim($_POST['vehicle'])) : '';
+    $password = isset($_POST['password']) ? $_POST['password'] : '';
+    $confirm = isset($_POST['confirm']) ? $_POST['confirm'] : '';
     $auto_image = isset($_FILES['image']['name']) ? $_FILES['image']['name'] : '';
-
-    $stmt = $conn->prepare("
-    SELECT email FROM driver WHERE email = ?
-    UNION
-    SELECT email FROM temporarydriver WHERE email = ?
-    UNION
-    SELECT email FROM passenger WHERE email = ?");
-    $stmt->bind_param("sss", $email, $email, $email);
-    $stmt->execute();
-    $stmt->store_result();
-    if ($stmt->num_rows > 0) {
-       $err = "Email already exists";
+    
+    if ($password !== $confirm) {
+        $err = "Passwords do not match.";
+    } elseif (empty($_FILES['image']['tmp_name'])) {
+        $err = "Please upload an image of your auto.";
     } else {
-    // Hash the password
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $target_dir = "uploads/";//uploading our driver's pic to uploads file for future uses
-        $target_file = $target_dir . basename($_FILES["image"]["name"]);
-        $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-        $check = getimagesize($_FILES["image"]["tmp_name"]);
+        // Check if email already exists
+        $stmt = $conn->prepare("
+            SELECT email FROM driver WHERE email = ?
+            UNION
+            SELECT email FROM temporarydriver WHERE email = ?
+            UNION
+            SELECT email FROM passenger WHERE email = ?");
+        $stmt->bind_param("sss", $email, $email, $email);
+        $stmt->execute();
+        $stmt->store_result();
         
-        if ($check !== false) {//check wather the file is image or not
-            if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-                $stmt = $conn->prepare("INSERT INTO temporarydriver (name, email, phone_no, address, vehicle_no, licence_no, password, gender, Auto_img, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
-                $stmt->bind_param("sssssssss", $name, $email, $phone, $address, $vehicle, $licence, $hashed_password, $gender, $auto_image);
-                
-                if ($stmt->execute()) {
-                    echo "<script>alert('please wait till admin admit your account');</script>";
-                } else {
-                   $err="Error: " . $stmt->error . "";
-                }
-                $stmt->close();
-            } else {
-                $err= "Sorry, there was an error uploading your file.";
+        if ($stmt->num_rows > 0) {
+            $err = "Email address already registered.";
+        } else {
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $target_dir = "uploads/";
+            
+            if (!file_exists($target_dir)) {
+                mkdir($target_dir, 0777, true);
             }
-        } else {
-            $err= "File is not an image.";
-    }
-}
-}
-
-// if the user trying to login
-if (isset($_POST["login"]) && $_POST["login"] == "submit") {
-    $email = isset($_POST['logmail']) ? htmlspecialchars(trim($_POST['logmail'])) : '';
-    $password = isset($_POST['logpass']) ? $_POST['logpass'] : '';
-    
-    $stmt = $conn->prepare("SELECT password FROM driver WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $stmt->store_result();
-    
-    if ($stmt->num_rows == 0) {
-        $err= "User not found";
-    } else {
-        $stmt->bind_result($db_password);
-        $stmt->fetch();
-        
-        // Verify the hashed password
-        if (password_verify($password, $db_password)) {
-            $stmt = $conn->prepare("SELECT * FROM driver WHERE email = ?");
-            $stmt->bind_param("s", $email);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $user = $result->fetch_assoc();
-
-            // $_SESSION['Dname'] = $user['name'];
-            $_SESSION['did'] = $user['driver_id'];
-            echo '<script>window.location.href="Driver.php";</script>';
-        } else {
-            $err="Incorrect password";
+            
+            $target_file = $target_dir . basename($_FILES["image"]["name"]);
+            $check = getimagesize($_FILES["image"]["tmp_name"]);
+            
+            if ($check !== false) {
+                if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
+                    $stmt = $conn->prepare("INSERT INTO temporarydriver (name, email, phone_no, address, vehicle_no, licence_no, password, gender, Auto_img, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+                    $stmt->bind_param("sssssssss", $name, $email, $phone, $address, $vehicle, $licence, $hashed_password, $gender, $auto_image);
+                    
+                    if ($stmt->execute()) {
+                        $success = "Application submitted! Please wait for administrator approval before logging in.";
+                    } else {
+                        $err = "Registration failed. Try again.";
+                    }
+                    $stmt->close();
+                } else {
+                    $err = "Error uploading auto image.";
+                }
+            } else {
+                $err = "Uploaded file is not a valid image.";
+            }
         }
-        $stmt->close();
     }
 }
-
 mysqli_close($conn);
 ?>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link rel="shortcut icon" href="images/favicon.ico" title="Favicon"/>
+    <title>Driver Registration | RICKSHAWHUB</title>
+    <link rel="stylesheet" href="styles/auth.css">
+</head>
 <body>
-    <!-- animation for the view -->
+    <!-- Background Animation -->
     <div class="area">
         <ul class="circles">
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
+            <li></li><li></li><li></li><li></li><li></li>
+            <li></li><li></li><li></li><li></li><li></li>
         </ul>
     </div>
-    <div class="wrapper">
-        <div class="inner">
-            <div class="image-holder">
-                <img src="images/registration-form.jpg" alt="">
+
+    <!-- Main Auth Card -->
+    <div class="auth-card">
+        <!-- Close Button -->
+        <a href="index.php" class="cross-btn" aria-label="Go to home">&times;</a>
+
+        <!-- Left Column: Branding / Hero -->
+        <div class="auth-hero">
+            <div class="hero-branding">
+                <h1 class="hero-logo">RICKSHAW<span>HUB</span>.</h1>
+                <p class="hero-desc">Register as a driver and join our network of professional auto drivers. Earn more with flexible hours.</p>
             </div>
-            <a href="index.php" class="cross"></a>
-            <form method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>"
-                enctype="multipart/form-data" class="disable">
-                <h3>Driver <span>Registration</span></h3>
-                <div class="form-wrapper">
-                    <input type="text" placeholder="Name" class="form-control" name="name" required>
-                    <i class="zmdi zmdi-account"></i>
+            
+            <div class="hero-graphics">
+                <img src="assets/header.png" alt="Auto Rickshaw Graphic">
+            </div>
+
+            <div class="hero-footer">
+                <p>&copy; <?php echo date("Y"); ?> RikshawHub. All rights reserved.</p>
+            </div>
+        </div>
+
+        <!-- Right Column: Registration Form -->
+        <div class="auth-form-section">
+            <h3 class="auth-view-title">Driver <span>Registration</span></h3>
+
+            <!-- Global Notifications -->
+            <?php if (!empty($err)): ?>
+                <div class="alert alert-error">
+                    <i class="ri-error-warning-line"></i>
+                    <span><?php echo $err; ?></span>
                 </div>
-                <div class="form-wrapper">
-                    <input type="email" placeholder="Email Address" class="form-control" name="email" required>
-                    <i class="zmdi zmdi-email"></i>
+            <?php endif; ?>
+
+            <?php if (!empty($success)): ?>
+                <div class="alert alert-success">
+                    <i class="ri-checkbox-circle-line"></i>
+                    <span><?php echo $success; ?></span>
                 </div>
-                <div class="form-wrapper">
-                    <select required class="form-control" name="gender">
-                        <option value="" disabled="" selected="">Gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                    </select>
-                    <i class="zmdi zmdi-caret-down" style="font-size: 17px"></i>
+            <?php endif; ?>
+
+            <form method="post" action="DriverReg.php" enctype="multipart/form-data">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <div class="input-with-icon">
+                            <input type="text" placeholder="Driver Name" name="name" required value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>">
+                            <i class="ri-user-line"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <div class="input-with-icon">
+                            <input type="email" placeholder="driver@example.com" name="email" required value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
+                            <i class="ri-mail-line"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Gender</label>
+                        <div class="input-with-icon">
+                            <select name="gender" required>
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="Male" <?php echo (isset($_POST['gender']) && $_POST['gender'] === 'Male') ? 'selected' : ''; ?>>Male</option>
+                                <option value="Female" <?php echo (isset($_POST['gender']) && $_POST['gender'] === 'Female') ? 'selected' : ''; ?>>Female</option>
+                                <option value="Other" <?php echo (isset($_POST['gender']) && $_POST['gender'] === 'Other') ? 'selected' : ''; ?>>Other</option>
+                            </select>
+                            <i class="ri-arrow-down-s-line"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <div class="input-with-icon">
+                            <input type="tel" placeholder="10-digit mobile number" name="phone" pattern="[0-9]{10}" title="Ten digit phone number" required value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>">
+                            <i class="ri-phone-line"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group form-group-full">
+                        <label class="form-label">Address</label>
+                        <div class="input-with-icon">
+                            <input type="text" placeholder="Base Address" name="address" required value="<?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?>">
+                            <i class="ri-home-4-line"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Licence Number</label>
+                        <div class="input-with-icon">
+                            <input type="text" placeholder="DL-xxxxxxxx" name="licence" required value="<?php echo isset($_POST['licence']) ? htmlspecialchars($_POST['licence']) : ''; ?>">
+                            <i class="ri-profile-line"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Vehicle Number</label>
+                        <div class="input-with-icon">
+                            <input type="text" placeholder="KL-xx-x-xxxx" name="vehicle" required value="<?php echo isset($_POST['vehicle']) ? htmlspecialchars($_POST['vehicle']) : ''; ?>">
+                            <i class="ri-taxi-card-line"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group form-group-full">
+                        <label class="form-label">Image of the Auto</label>
+                        <label class="custom-file-upload">
+                            <input type="file" name="image" accept="image/*" required onchange="updateFileName(this)">
+                            <i class="ri-camera-switch-line"></i>
+                            <span class="file-name-text">Upload auto image...</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group form-group-full">
+                        <label class="form-label">Passwords</label>
+                        <div class="password-row">
+                            <div class="input-with-icon">
+                                <input type="password" placeholder="Password" name="password" required>
+                                <i class="ri-lock-line"></i>
+                            </div>
+                            <div class="input-with-icon">
+                                <input type="password" placeholder="Confirm Password" name="confirm" required>
+                                <i class="ri-lock-check-line"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-wrapper">
-                    <input type="text" required placeholder="Address" class="form-control" name="address">
-                    <i class="zmdi zmdi-home"></i>
-                </div>
-                <div class="form-wrapper">
-                    <input type="tel" required placeholder="Phone number" class="form-control" name="phone">
-                    <i class="zmdi zmdi-phone"></i>
-                </div>
-                <div class="form-wrapper">
-                    <input type="text" required placeholder="Licence number" class="form-control" name="licence">
-                    <i class="zmdi zmdi-card"></i>
-                </div>
-                <div class="form-wrapper">
-                    <input type="text" required placeholder="Vehicle number" class="form-control" name="vehicle">
-                    <i class="zmdi zmdi-car"></i>
-                </div>
-                <div class="form-wrapper">
-                    <label for="imageUpload">Image of the auto:</label>
-                    <input type="file" id="imageUpload" name="image" accept="image/*" required>
-                    <i class="zmdi zmdi-camera"></i>
-                </div>
-                <div class="form-wrapper">
-                    <input type="password" placeholder="Password" class="form-control" name="password" required>
-                    <input type="password" placeholder="Confirm Password" class="form-control" name="confirm" required>
-                    <i class="zmdi zmdi-lock"></i>
-                </div>
-                <h5 class="error"><?php echo $err; ?></h5>
-                <div class="buttons">
-                    <button value="submit" name="Register">Register</button>
-                    <div class="logbtn">Login</div>
-                </div>
-            </form>
-            <form method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" class="login">
-                <h3>Driver <span>Login</span></h3>
-                <div class="form-wrapper">
-                    <input type="email" placeholder="Email Address" class="form-control" name="logmail" required>
-                    <i class="zmdi zmdi-email"></i>
-                </div>
-                <div class="form-wrapper">
-                    <input type="password" placeholder="Password" class="form-control" name="logpass" required>
-                    <i class="zmdi zmdi-lock"></i>
-                </div>
-                <h5 class="error"><?php echo $err; ?></h5>
-                <div class="buttons">
-                    <button value="submit" name="login">Login</button>
-                    <div class="regbtn">Register</div>
+
+                <div class="form-actions" style="margin-top: 30px;">
+                    <button type="submit" class="submit-btn">Apply Now</button>
+                    <a href="login.php" class="toggle-view-link">Already registered? <strong>Login</strong></a>
                 </div>
             </form>
         </div>
     </div>
-    <script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-23581568-13"></script>
-    <script src='scripts/reg.js'></script>
-</body>
 
+    <script>
+        function updateFileName(input) {
+            const labelSpan = input.parentNode.querySelector('.file-name-text');
+            if (input.files && input.files[0]) {
+                labelSpan.textContent = input.files[0].name;
+                labelSpan.style.color = 'var(--text-dark)';
+            } else {
+                labelSpan.textContent = 'Upload auto image...';
+                labelSpan.style.color = 'var(--text-light)';
+            }
+        }
+    </script>
+</body>
 </html>

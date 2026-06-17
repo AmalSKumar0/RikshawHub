@@ -15,7 +15,7 @@
         <li><a href="#" style="color:#ff833e;">Home</a></li>
         <li><a href="about.php">About Us</a></li>
         <li><a href="#" id="testimoniesButton">Reviews</a></li>
-        <li><a href="PassReg.php">Ride now</a></li>
+        <li><a href="login.php?role=passenger">Ride now</a></li>
         <!-- <li><a href="#" id="aboutusButton">Contact us</a></li> -->
     </ul>
     <div class="nav__btns">
@@ -30,7 +30,7 @@
             Taxi Booking
         </div>
         <div class="header__image__card header__image__card-2">
-            <span><a href="adminLog.php"><i class="ri-passport-line"></i></span>
+            <span><a href="login.php?role=admin"><i class="ri-passport-line"></i></span>
             Affordable</a>
         </div>
         <div class="header__image__card header__image__card-3">
@@ -51,7 +51,7 @@
         </p>
         <div class="container">
             <div class="input__row">
-                <a class="passenger" href="PassReg.php">I'M A PASSENGER</a><a class="driver" href="DriverReg.php">I'M A
+                <a class="passenger" href="login.php?role=passenger&view=register">I'M A PASSENGER</a><a class="driver" href="login.php?role=driver&view=register">I'M A
                     DRIVER</a>
             </div>
         </div>
